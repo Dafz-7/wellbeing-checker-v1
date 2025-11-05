@@ -3,6 +3,7 @@ A desktop app made in python that:
   1. Summarizes your wellbeing throughout the month and ongoing, in the form of statistics and AI's opinion.
   2. Helps you recall your best and worst memories.
 
+
 # Features in V1
   1. Accepts user input for a diary.
   2. A time limit of how much the app has opened for, to NOT be a distraction instead. This app is only for short diary input.
