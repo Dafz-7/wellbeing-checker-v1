@@ -1,0 +1,58 @@
+<WelcomeScreen>:
+    BoxLayout:
+        orientation: "vertical"
+
+        # Top bar
+        BoxLayout:
+            size_hint_y: None
+            height: "40dp"
+            padding: 10
+            spacing: 10
+
+            AnchorLayout:
+                anchor_x: "center"
+                anchor_y: "center"
+                Label:
+                    text: app.remaining_time_str
+                    halign: "center"
+                    valign: "middle"
+                    text_size: self.size
+
+            Button:
+                text: "Settings"
+                size_hint_x: None
+                width: "120dp"
+                on_release: root.go_to_settings()
+
+            Button:
+                text: "Refresh"
+                size_hint_x: None
+                width: "120dp"
+                on_release: root.refresh_page()
+
+        # Main content
+        BoxLayout:
+            orientation: "vertical"
+            padding: 20
+            spacing: 20
+
+            Label:
+                text: "Welcome, user."
+                font_size: "24sp"
+
+            Label:
+                text: root.greeting
+                font_size: "18sp"
+
+            Widget:
+
+            BoxLayout:
+                size_hint_y: None
+                height: "40dp"
+                spacing: 10
+                Button:
+                    text: "Log in"
+                    on_release: root.go_to_login()
+                Button:
+                    text: "Sign up"
+                    on_release: root.go_to_signup()

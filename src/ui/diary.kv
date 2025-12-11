@@ -1,0 +1,66 @@
+<DiaryScreen>:
+    BoxLayout:
+        orientation: "vertical"
+
+        # Top bar
+        BoxLayout:
+            size_hint_y: None
+            height: "40dp"
+            padding: 10
+            spacing: 10
+            Button:
+                text: "< Back to Welcome"
+                size_hint_x: None
+                width: "150dp"
+                on_release: root.back_to_welcome()
+            Widget:
+            Button:
+                text: "Settings"
+                size_hint_x: None
+                width: "120dp"
+                on_release: root.go_to_settings()
+            Button:
+                text: "Refresh"
+                size_hint_x: None
+                width: "120dp"
+                on_release: root.refresh_page()
+
+        # Main content
+        BoxLayout:
+            orientation: "vertical"
+            padding: 20
+            spacing: 20
+
+            Label:
+                text: "Diary"
+                font_size: "22sp"
+
+            # Show current system date/time
+            Label:
+                text: root.current_datetime
+                font_size: "16sp"
+                size_hint_y: None
+                height: "30dp"
+
+            TextInput:
+                id: entry
+                hint_text: "Write your thoughts here..."
+                multiline: True
+                size_hint_y: 0.7
+
+            Button:
+                text: "Save Entry"
+                size_hint_y: None
+                height: "40dp"
+                on_release: root.save_entry()
+
+            BoxLayout:
+                size_hint_y: None
+                height: "40dp"
+                spacing: 10
+                Button:
+                    text: "Go to Summary"
+                    on_release: root.go_to_summary()
+                Button:
+                    text: "Go to Settings"
+                    on_release: root.go_to_settings()

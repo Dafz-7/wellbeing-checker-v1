@@ -1,0 +1,82 @@
+<SettingsScreen>:
+    BoxLayout:
+        orientation: "vertical"
+
+        # Top bar
+        BoxLayout:
+            size_hint_y: None
+            height: "40dp"
+            padding: 10
+            spacing: 10
+
+            AnchorLayout:
+                anchor_x: "center"
+                anchor_y: "center"
+                Label:
+                    text: app.remaining_time_str
+                    halign: "center"
+                    valign: "middle"
+                    text_size: self.size
+
+            Button:
+                text: "< Back to Welcome"
+                size_hint_x: None
+                width: "150dp"
+                on_release: root.back_to_welcome()
+            Widget:
+            Button:
+                text: "Settings"
+                size_hint_x: None
+                width: "120dp"
+                on_release: root.go_to_settings()
+            Button:
+                text: "Refresh"
+                size_hint_x: None
+                width: "120dp"
+                on_release: root.refresh_page()
+
+        # Main content
+        BoxLayout:
+            orientation: "vertical"
+            padding: 20
+            spacing: 20
+
+            Label:
+                text: "Settings"
+                font_size: "22sp"
+
+            BoxLayout:
+                size_hint_y: None
+                height: "40dp"
+                spacing: 10
+                Label:
+                    text: "Session Timer (seconds):"
+                TextInput:
+                    id: timer_input
+                    hint_text: "Enter 20 - 1800"
+                    multiline: False
+                    size_hint_x: None
+                    width: "120dp"
+                Button:
+                    text: "Apply"
+                    on_release: root.set_timer(timer_input.text)
+
+            ToggleButton:
+                text: "Dark Mode"
+                size_hint_y: None
+                height: "40dp"
+                on_state: root.toggle_theme()
+
+            ToggleButton:
+                text: "Daily Reminder"
+                size_hint_y: None
+                height: "40dp"
+                on_state: root.toggle_reminder()
+
+            Button:
+                text: "Back to Diary"
+                size_hint_y: None
+                height: "40dp"
+                on_release:
+                    app.root.transition.direction = "right"
+                    app.root.current = "diary"

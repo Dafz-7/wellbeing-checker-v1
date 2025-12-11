@@ -1,72 +1,80 @@
-import kivy
 from kivy.app import App
+from kivy.lang import Builder
+from kivy.uix.screenmanager import ScreenManager, SlideTransition
+from kivy.clock import Clock
+from kivy.properties import StringProperty
 
-from kivy.uix.label import Label
-from kivy.uix.textinput import TextInput
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.button import Button
+# Import your screen classes
+from welcome import WelcomeScreen
+from login import LoginScreen
+from signup import SignupScreen
+from diary import DiaryScreen
+from summary import SummaryScreen
+from settings import SettingsScreen
 
-class MyGridLayout(GridLayout):
+class Root(ScreenManager):
     def __init__(self, **kwargs):
-        super(MyGridLayout, self).__init__(**kwargs)
+        super().__init__(**kwargs)
+        self.transition = SlideTransition()
 
-        self.cols = 1
+class WellbeingApp(App):
+    title = "Wellbeing-Checker-V1"
 
-        self.top_grid = GridLayout()
-        self.top_grid.cols = 2
+    # StringProperty so UI updates automatically
+    remaining_time_str = StringProperty("30:00")
 
-        self.bottom_grid = GridLayout()
-        self.bottom_grid.cols = 1
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.session_length = 30 * 60  # default 30 minutes
+        self.remaining_time = self.session_length
+        self.timer_event = None
 
-        self.add_widget(self.top_grid)
-        self.add_widget(self.bottom_grid)
-
-        self.username = Label(
-            text="Enter your username:"
-        )
-
-        self.password = Label(
-            text="Enter your password:"
-        )
-
-        self.top_grid.add_widget(self.username)
-        self.textinput_username = TextInput(
-            multiline=False
-        )
-        self.top_grid.add_widget(self.textinput_username)
-        
-        self.top_grid.add_widget(self.password)
-        self.textinput_password = TextInput(
-            multiline=False
-        )
-        self.top_grid.add_widget(self.textinput_password)
-
-        self.submit_button = Button(
-            text="Submit"
-        )
-
-        self.bottom_grid.add_widget(self.submit_button)
-
-        self.submit_button.bind(
-            on_press=self.press
-        )
-
-    def press(self, instance):
-        username = self.textinput_username.text
-        password = self.textinput_password.text
-
-        self.bottom_grid.add_widget(
-            Label(
-                text=f"Your username is: {username} and your password is {password}."
-            )
-        )
-
-        self.textinput_username.text = ""
-        self.textinput_password.text = ""
-
-class app(App):
     def build(self):
-        return MyGridLayout()
-    
+        # Load KV files (adjust paths if needed)
+        Builder.load_file("ui/welcome.kv")
+        Builder.load_file("ui/login.kv")
+        Builder.load_file("ui/signup.kv")
+        Builder.load_file("ui/diary.kv")
+        Builder.load_file("ui/summary.kv")
+        Builder.load_file("ui/settings.kv")
+
+        sm = Root()
+        sm.add_widget(WelcomeScreen(name="welcome"))
+        sm.add_widget(LoginScreen(name="login"))
+        sm.add_widget(SignupScreen(name="signup"))
+        sm.add_widget(DiaryScreen(name="diary"))
+        sm.add_widget(SummaryScreen(name="summary"))
+        sm.add_widget(SettingsScreen(name="settings"))
+
+        sm.current = "welcome"
+
+        # Start session timer
+        self.start_session_timer()
+        return sm
+
+    def start_session_timer(self):
+        self.remaining_time = self.session_length
+        if self.timer_event:
+            self.timer_event.cancel()
+        self.timer_event = Clock.schedule_interval(self.update_timer, 1)
+
+    def update_timer(self, dt):
+        self.remaining_time -= 1
+        minutes, seconds = divmod(self.remaining_time, 60)
+        self.remaining_time_str = f"{minutes:02}:{seconds:02}"
+        if self.remaining_time <= 0:
+            print("Session expired. Closing app.")
+            self.stop()
+
+    def set_session_length(self, seconds):
+        if seconds < 20:
+            print("Session length too short! Must be at least 20 seconds.")
+            return
+        if seconds > 30 * 60:
+            print("Session length cannot exceed 30 minutes (1800 seconds).")
+            return
+        self.session_length = seconds
+        self.start_session_timer()
+
 if __name__ == "__main__":
-    app().run()
+    WellbeingApp().run()
