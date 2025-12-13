@@ -2,32 +2,32 @@
     BoxLayout:
         orientation: "vertical"
 
-        # Top bar
+        # Top bar (TRUE centered timer)
         BoxLayout:
             size_hint_y: None
-            height: "40dp"
+            height: "64dp"
             padding: 10
             spacing: 10
 
-            AnchorLayout:
-                anchor_x: "center"
-                anchor_y: "center"
-                Label:
-                    text: app.remaining_time_str
-                    halign: "center"
-                    valign: "middle"
-                    text_size: self.size
-
-            Button:
-                text: "Settings"
+            # Left spacer (matches refresh width)
+            Widget:
                 size_hint_x: None
-                width: "120dp"
-                on_release: root.go_to_settings()
+                width: "100dp"
 
+            # Center countdown (now truly centered)
+            Label:
+                text: app.remaining_time_str
+                font_size: "16sp"
+                bold: True
+                halign: "center"
+                valign: "middle"
+                text_size: self.size
+
+            # Right refresh button
             Button:
                 text: "Refresh"
                 size_hint_x: None
-                width: "120dp"
+                width: "100dp"
                 on_release: root.refresh_page()
 
         # Main content
@@ -37,12 +37,18 @@
             spacing: 20
 
             Label:
-                text: "Welcome, user."
+                text: root.greeting
                 font_size: "24sp"
+                halign: "center"
+                valign: "middle"
+                text_size: self.size
 
             Label:
-                text: root.greeting
-                font_size: "18sp"
+                text: root.message
+                font_size: "20sp"
+                halign: "center"
+                valign: "middle"
+                text_size: self.size
 
             Widget:
 

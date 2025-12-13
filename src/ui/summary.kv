@@ -5,25 +5,61 @@
         # Top bar
         BoxLayout:
             size_hint_y: None
-            height: "40dp"
+            height: "104dp"
             padding: 10
             spacing: 10
-            Button:
-                text: "< Back to Welcome"
+
+            # Left: stacked Back to Welcome + Back to Diary
+            BoxLayout:
+                orientation: "vertical"
                 size_hint_x: None
-                width: "150dp"
-                on_release: root.back_to_welcome()
+                width: "160dp"
+                spacing: 6
+
+                Button:
+                    text: "< Back to Welcome"
+                    size_hint_y: None
+                    height: "40dp"
+                    font_size: "14sp"
+                    on_release: root.back_to_welcome()
+
+                Button:
+                    text: "< Back to Diary"
+                    size_hint_y: None
+                    height: "40dp"
+                    font_size: "14sp"
+                    on_release: root.back_to_diary()
+
             Widget:
-            Button:
-                text: "Settings"
                 size_hint_x: None
-                width: "120dp"
-                on_release: root.go_to_settings()
-            Button:
-                text: "Refresh"
+                width: "40dp"
+
+            # Center: countdown timer
+            Label:
+                text: app.remaining_time_str
+                font_size: "14sp"
+                bold: True
+                halign: "center"
+                valign: "middle"
+                text_size: self.size
+
+            # Right: Settings + Refresh
+            BoxLayout:
+                spacing: 10
                 size_hint_x: None
-                width: "120dp"
-                on_release: root.refresh_page()
+                width: "210dp"
+
+                Button:
+                    text: "Settings"
+                    size_hint_x: None
+                    width: "100dp"
+                    on_release: root.go_to_settings()
+
+                Button:
+                    text: "Refresh"
+                    size_hint_x: None
+                    width: "100dp"
+                    on_release: root.refresh_page()
 
         # Main content
         BoxLayout:
@@ -40,9 +76,3 @@
                 size_hint_y: None
                 height: "40dp"
                 on_release: root.show_summary()
-
-            Button:
-                text: "Back to Diary"
-                size_hint_y: None
-                height: "40dp"
-                on_release: root.go_to_diary()

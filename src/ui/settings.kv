@@ -2,37 +2,55 @@
     BoxLayout:
         orientation: "vertical"
 
-        # Top bar
+        # Top bar (stacked left | CENTER timer | right refresh)
         BoxLayout:
             size_hint_y: None
-            height: "40dp"
+            height: "124dp"   # taller to fit 3 stacked buttons
             padding: 10
             spacing: 10
 
-            AnchorLayout:
-                anchor_x: "center"
-                anchor_y: "center"
-                Label:
-                    text: app.remaining_time_str
-                    halign: "center"
-                    valign: "middle"
-                    text_size: self.size
+            # Left: stacked Back buttons
+            BoxLayout:
+                orientation: "vertical"
+                size_hint_x: None
+                width: "160dp"
+                spacing: 6
 
-            Button:
-                text: "< Back to Welcome"
-                size_hint_x: None
-                width: "150dp"
-                on_release: root.back_to_welcome()
-            Widget:
-            Button:
-                text: "Settings"
-                size_hint_x: None
-                width: "120dp"
-                on_release: root.go_to_settings()
+                Button:
+                    text: "< Back to Welcome"
+                    size_hint_y: None
+                    height: "30dp"
+                    font_size: "14sp"
+                    on_release: root.back_to_welcome()
+
+                Button:
+                    text: "< Back to Diary"
+                    size_hint_y: None
+                    height: "30dp"
+                    font_size: "14sp"
+                    on_release: root.back_to_diary()
+
+                Button:
+                    text: "< Back to Summary"
+                    size_hint_y: None
+                    height: "30dp"
+                    font_size: "14sp"
+                    on_release: root.back_to_summary()
+
+            # Center: countdown timer
+            Label:
+                text: app.remaining_time_str
+                font_size: "14sp"
+                bold: True
+                halign: "center"
+                valign: "middle"
+                text_size: self.size
+
+            # Right: Refresh button
             Button:
                 text: "Refresh"
                 size_hint_x: None
-                width: "120dp"
+                width: "160dp"
                 on_release: root.refresh_page()
 
         # Main content
@@ -60,23 +78,3 @@
                 Button:
                     text: "Apply"
                     on_release: root.set_timer(timer_input.text)
-
-            ToggleButton:
-                text: "Dark Mode"
-                size_hint_y: None
-                height: "40dp"
-                on_state: root.toggle_theme()
-
-            ToggleButton:
-                text: "Daily Reminder"
-                size_hint_y: None
-                height: "40dp"
-                on_state: root.toggle_reminder()
-
-            Button:
-                text: "Back to Diary"
-                size_hint_y: None
-                height: "40dp"
-                on_release:
-                    app.root.transition.direction = "right"
-                    app.root.current = "diary"

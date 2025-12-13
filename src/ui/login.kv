@@ -2,27 +2,34 @@
     BoxLayout:
         orientation: "vertical"
 
-        # Top bar
+        # Top bar (Back | CENTER timer | Refresh)
         BoxLayout:
             size_hint_y: None
-            height: "40dp"
+            height: "64dp"
             padding: 10
             spacing: 10
+
+            # Left: Back button
             Button:
                 text: "< Back to Welcome"
                 size_hint_x: None
-                width: "150dp"
+                width: "160dp"
                 on_release: root.back_to_welcome()
-            Widget:
-            Button:
-                text: "Settings"
-                size_hint_x: None
-                width: "120dp"
-                on_release: root.go_to_settings()
+
+            # Center: countdown timer (TRUE center)
+            Label:
+                text: app.remaining_time_str
+                font_size: "14sp"
+                bold: True
+                halign: "center"
+                valign: "middle"
+                text_size: self.size
+
+            # Right: Refresh button (same width as Back)
             Button:
                 text: "Refresh"
                 size_hint_x: None
-                width: "120dp"
+                width: "160dp"
                 on_release: root.refresh_page()
 
         # Main content

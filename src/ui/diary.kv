@@ -2,28 +2,62 @@
     BoxLayout:
         orientation: "vertical"
 
-        # Top bar
+        # Top bar (FIXED – no overflow)
         BoxLayout:
             size_hint_y: None
-            height: "40dp"
+            height: "104dp"
             padding: 10
             spacing: 10
+
+            # Left: Back button
             Button:
                 text: "< Back to Welcome"
                 size_hint_x: None
-                width: "150dp"
+                width: "160dp"
                 on_release: root.back_to_welcome()
+
             Widget:
-            Button:
-                text: "Settings"
                 size_hint_x: None
-                width: "120dp"
-                on_release: root.go_to_settings()
-            Button:
-                text: "Refresh"
+                width: "40dp"
+
+            # Center: countdown timer
+            Label:
+                text: app.remaining_time_str
+                font_size: "14sp"
+                bold: True
+                halign: "center"
+                valign: "middle"
+                text_size: self.size
+
+            # Right: stacked actions
+            BoxLayout:
+                orientation: "vertical"
                 size_hint_x: None
-                width: "120dp"
-                on_release: root.refresh_page()
+                width: "210dp"
+                spacing: 6
+
+                BoxLayout:
+                    spacing: 10
+                    size_hint_y: None
+                    height: "40dp"
+
+                    Button:
+                        text: "Settings"
+                        size_hint_x: None
+                        width: "100dp"
+                        on_release: root.go_to_settings()
+
+                    Button:
+                        text: "Refresh"
+                        size_hint_x: None
+                        width: "100dp"
+                        on_release: root.refresh_page()
+
+                Button:
+                    text: "Go to Summary >"
+                    size_hint_y: None
+                    height: "40dp"
+                    on_release: root.go_to_summary()
 
         # Main content
         BoxLayout:
@@ -44,7 +78,7 @@
 
             TextInput:
                 id: entry
-                hint_text: "Write your thoughts here..."
+                hint_text: "Write your thoughts here... (Add details about your day... This will help the AI analyse your mood better!)"
                 multiline: True
                 size_hint_y: 0.7
 
@@ -53,14 +87,3 @@
                 size_hint_y: None
                 height: "40dp"
                 on_release: root.save_entry()
-
-            BoxLayout:
-                size_hint_y: None
-                height: "40dp"
-                spacing: 10
-                Button:
-                    text: "Go to Summary"
-                    on_release: root.go_to_summary()
-                Button:
-                    text: "Go to Settings"
-                    on_release: root.go_to_settings()
