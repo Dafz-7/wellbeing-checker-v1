@@ -102,12 +102,15 @@ class SummaryScreen(Screen):
         prompt = f"""
         Based on these diary stats:
         - Average polarity: {stats['avg_polarity']:.2f}
-        - Counts: {stats['counts']}
+        - Distribution: {stats['counts']['happy']} happy days, {stats['counts']['very happy']} very happy days,
+        compared to {stats['counts']['sad']} sad days and {stats['counts']['very sad']} very sad days.
         - Happiest day: {stats['happiest_day']}
 
-        Please give the user a short, straight-forward paragraph about things they can improve
-        for the future (similar to a short essay, not an email format please). Please limit to only 2 sentences.
+        Please give the user a short, straight-forward paragraph that reflects the overall trend.
+        Celebrate positives if they dominate, but also mention one area to improve.
+        Limit to no more than 6 sentences.
         """
+
 
         def run_ai():
             ai_text = get_ai_recommendation(prompt)
