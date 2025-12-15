@@ -29,7 +29,7 @@ from database import (
     upsert_monthly_summary,
 )
 
-from datetime import datetime, timedelta
+from datetime import datetime
 
 
 class Root(ScreenManager):
@@ -149,18 +149,26 @@ class WellbeingApp(App):
         diary_screen = self.root.get_screen("diary")
 
         diary_text = ""
-        entry_saved = False
-
         if "entry" in diary_screen.ids:
             diary_text = diary_screen.ids.entry.text.strip()
-        if hasattr(diary_screen, "entry_saved"):
-            entry_saved = diary_screen.entry_saved
+
+        entry_saved = getattr(diary_screen, "entry_saved", False)
+
+        # --- NEW: check database for today's entry ---
+        has_today_entry = False
+        if self.current_user_id:
+            today_str = datetime.now().strftime("%Y-%m-%d")
+            year = datetime.now().year
+            month = datetime.now().month
+            rows = get_entries_for_month(self.current_user_id, year, month)
+            # rows = [(entry, timestamp, wellbeing_level, polarity), ...]
+            has_today_entry = any(r[1].startswith(today_str) for r in rows)
 
         if diary_text and not entry_saved:
             self.show_quit_popup("Save the entry first!", only_ok=True)
             return True
 
-        if entry_saved:
+        if entry_saved or has_today_entry:
             self.show_quit_popup("Leaving the app already?...", stay_quit=True)
             return True
 
