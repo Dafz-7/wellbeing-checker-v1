@@ -53,6 +53,7 @@ def reset_and_seed_diary(user_id=1):
         # Use your sentiment analyzer
         wellbeing_level, polarity = analyze_sentiment(entry_text)
 
+        # Original timestamp format (12-hour clock with AM/PM)
         timestamp = current.strftime("%Y-%m-%d %I:%M:%S %p")
         date_str = current.strftime("%Y-%m-%d")
 
