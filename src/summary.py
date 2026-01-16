@@ -1,3 +1,11 @@
+"""
+Summary Screen for the app.
+Displays monthly wellbeing summaries with:
+- Matplotlib bar chart of sentiment distribution
+- Textual insights (average polarity, happiest day, sample diary)
+- AI-generated recommendation (threaded for responsiveness)
+"""
+
 from kivy.uix.screenmanager import Screen
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
@@ -9,18 +17,42 @@ from datetime import datetime
 from kivy_garden.matplotlib import FigureCanvasKivyAgg
 import matplotlib.pyplot as plt
 
+# Database helpers
 from database import get_entries_for_month, compute_month_stats
+# AI helper
 from ollama_helper import get_ai_recommendation
 
 import threading
 
 
 class SummaryScreen(Screen):
+    """
+    Screen for displaying monthly wellbeing summaries.
+    Features:
+    - Auto-render summary when entering screen
+    - Bar chart visualization of wellbeing distribution
+    - Textual insights (average polarity, happiest day, diary snippet)
+    - AI recommendation generated in background thread
+    - Refresh/reset functionality
+    - Navigation to Welcome, Settings, and Diary screens
+    """
+
     def on_pre_enter(self):
-        # Automatically render summary when entering the screen
+        """
+        Event triggered before the screen is displayed.
+        Automatically renders the current month's summary.
+        """
         self.render_current_month_summary()
 
     def render_current_month_summary(self):
+        """
+        Render the monthly summary:
+        - Fetch diary entries for selected month/year
+        - Compute statistics (counts, average polarity, happiest day)
+        - Display bar chart of wellbeing distribution
+        - Show textual insights
+        - Trigger AI recommendation generation
+        """
         app = App.get_running_app()
         if app.current_user_id is None:
             self._show_popup("Error", "No user logged in.")
@@ -37,11 +69,11 @@ class SummaryScreen(Screen):
 
         stats = compute_month_stats(rows)
 
-        # Clear both container
+        # Clear containers before rendering new summary
         self.ids.chart_box.clear_widgets()
         self.ids.summary_container.clear_widgets()
 
-        # Title
+        # Title label
         self.ids.summary_container.add_widget(
             Label(
                 text=f"Monthly Summary: {datetime(year, month, 1).strftime('%B %Y')}",
@@ -50,7 +82,7 @@ class SummaryScreen(Screen):
             )
         )
 
-        # Matplotlib bar chart
+        # Matplotlib bar chart of wellbeing distribution
         labels = ["very sad", "sad", "normal", "happy", "very happy"]
         values = [stats["counts"][l] for l in labels]
 
@@ -85,11 +117,17 @@ class SummaryScreen(Screen):
 
         self.ids.summary_container.add_widget(info)
 
-        # AI recommendation (threaded)
+        # AI recommendation (threaded for responsiveness)
         self._generate_recommendation(stats)
 
     def _generate_recommendation(self, stats):
-        # Show loading popup
+        """
+        Generate AI recommendation based on monthly stats.
+        - Show loading popup
+        - Build prompt with polarity, distribution, happiest day
+        - Run AI helper in background thread
+        - Fallback message if AI unavailable
+        """
         self.loading_popup = Popup(
             title="AI is thinking...",
             content=Label(text="Generating recommendation..."),
@@ -111,7 +149,6 @@ class SummaryScreen(Screen):
         Limit to no more than 6 sentences.
         """
 
-
         def run_ai():
             ai_text = get_ai_recommendation(prompt)
             if "AI unavailable" in ai_text:
@@ -123,6 +160,11 @@ class SummaryScreen(Screen):
         threading.Thread(target=run_ai, daemon=True).start()
 
     def _show_ai_result(self, ai_text):
+        """
+        Display AI recommendation in summary container.
+        - Dismiss loading popup
+        - Add styled label with recommendation text
+        """
         if hasattr(self, "loading_popup"):
             self.loading_popup.dismiss()
 
@@ -140,6 +182,11 @@ class SummaryScreen(Screen):
         self.ids.summary_container.add_widget(lbl)
 
     def refresh_page(self):
+        """
+        Show confirmation popup before refreshing summary.
+        - If confirmed: clear summary container, re-render summary
+        - If canceled: do nothing
+        """
         from kivy.uix.button import Button
 
         content = BoxLayout(orientation="vertical", spacing=10, padding=10)
@@ -161,6 +208,7 @@ class SummaryScreen(Screen):
         )
 
         def do_refresh(instance):
+            """Clear summary and re-render."""
             if "summary_container" in self.ids:
                 self.ids.summary_container.clear_widgets()
             popup.dismiss()
@@ -168,6 +216,7 @@ class SummaryScreen(Screen):
             self._show_popup("Success", "Refresh success!")
 
         def cancel_refresh(instance):
+            """Cancel refresh and close popup."""
             popup.dismiss()
 
         yes_btn.bind(on_release=do_refresh)
@@ -175,6 +224,12 @@ class SummaryScreen(Screen):
         popup.open()
 
     def _show_popup(self, title, message):
+        """
+        Utility function to show a popup with a message.
+        Parameters:
+        - title: str, popup window title
+        - message: str, message displayed inside the popup
+        """
         from kivy.uix.button import Button
         content = BoxLayout(orientation="vertical", spacing=10, padding=10)
         content.add_widget(Label(text=message))
@@ -191,13 +246,16 @@ class SummaryScreen(Screen):
         popup.open()
 
     def back_to_welcome(self):
+        """Navigate back to the Welcome screen."""
         self.manager.transition.direction = "right"
         self.manager.current = "welcome"
 
     def go_to_settings(self):
+        """Navigate to the Settings screen."""
         self.manager.transition.direction = "left"
         self.manager.current = "settings"
 
     def back_to_diary(self):
+        """Navigate back to the Diary screen."""
         self.manager.transition.direction = "right"
         self.manager.current = "diary"

@@ -1,3 +1,8 @@
+"""
+This file is for experiment purposes only.
+This is for removing the entire database, to create another new, fresh database (in case some data are corrupted, because this happens occasionally).
+"""
+
 import sqlite3
 
 def clear_diary_table():

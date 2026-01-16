@@ -2,21 +2,21 @@
     BoxLayout:
         orientation: "vertical"
 
-        # Top bar (Back | CENTER timer | Refresh)
+        # ---------------- Top bar (Back | Center timer | Refresh) ----------------
         BoxLayout:
             size_hint_y: None
             height: "64dp"
             padding: 10
             spacing: 10
 
-            # Left: Back button
+            # Left: Back button (navigates to Welcome screen)
             Button:
                 text: "< Back to Welcome"
                 size_hint_x: None
                 width: "160dp"
                 on_release: root.back_to_welcome()
 
-            # Center: countdown timer (TRUE center)
+            # Center: countdown timer (bound to app.remaining_time_str)
             Label:
                 text: app.remaining_time_str
                 font_size: "14sp"
@@ -25,29 +25,32 @@
                 valign: "middle"
                 text_size: self.size
 
-            # Right: Refresh button (same width as Back)
+            # Right: Refresh button (same width as Back button)
             Button:
                 text: "Refresh"
                 size_hint_x: None
                 width: "160dp"
                 on_release: root.refresh_page()
 
-        # Main content
+        # ---------------- Main content (Login form) ----------------
         BoxLayout:
             orientation: "vertical"
             padding: 20
             spacing: 20
 
+            # Title label
             Label:
                 text: "Login"
                 font_size: "22sp"
 
+            # Username input field
             TextInput:
                 id: username
                 hint_text: "Username"
                 size_hint_y: None
                 height: "40dp"
 
+            # Password input field (hidden characters)
             TextInput:
                 id: password
                 hint_text: "Password"
@@ -55,13 +58,18 @@
                 size_hint_y: None
                 height: "40dp"
 
+            # ---------------- Action buttons ----------------
             BoxLayout:
                 size_hint_y: None
                 height: "40dp"
                 spacing: 10
+
+                # Log in button (calls root.login())
                 Button:
                     text: "Log in"
                     on_release: root.login()
+
+                # Sign up button (calls root.signup())
                 Button:
                     text: "Sign up"
                     on_release: root.signup()

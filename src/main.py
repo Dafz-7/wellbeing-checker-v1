@@ -1,3 +1,7 @@
+"""
+Main application file for Wellbeing-Checker-V1.
+"""
+
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, SlideTransition
@@ -11,7 +15,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 
-# Screens
+# Screens (import custom screen classes here)
 from welcome import WelcomeScreen
 from login import LoginScreen
 from signup import SignupScreen
@@ -33,18 +37,32 @@ from datetime import datetime
 
 
 class Root(ScreenManager):
+    """
+    Root screen manager that controls nagivation between different screen.
+    Uses the class SlideTransition in Kivy for smooth screen transition.
+    """
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.transition = SlideTransition()
 
 
 class WellbeingApp(App):
+    """
+    Main application class for this app.
+    Handles:
+    - Session timer
+    - User login and signup
+    - Monthly summary generation
+    - Popup dialogs
+    """
     title = "Wellbeing-Checker-V1"
     remaining_time_str = StringProperty("30:00")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.session_length = 30 * 60  # default 30 minutes
+
+        # Default session length is 30 minutes
+        self.session_length = 30 * 60
         self.remaining_time = self.session_length
         self.timer_event = None
 
@@ -57,6 +75,15 @@ class WellbeingApp(App):
         self.selected_month = None
 
     def build(self):
+        """
+        Build the application:
+        - Initialize database
+        - Load KV files for UI
+        - Add all screen to the ScreenManager
+        - Start session timer
+        - Bind quit event
+        """
+
         # Initialize database
         init_db()
 
@@ -89,12 +116,14 @@ class WellbeingApp(App):
 
     # ---------------- Timer Management ----------------
     def start_session_timer(self):
+        """Start or restart the session timer."""
         self.remaining_time = self.session_length
         if self.timer_event:
             self.timer_event.cancel()
         self.timer_event = Clock.schedule_interval(self.update_timer, 1)
 
     def update_timer(self, dt):
+        """Update timer every second and show extend popup when timer ends."""
         self.remaining_time -= 1
         minutes, seconds = divmod(self.remaining_time, 60)
         self.remaining_time_str = f"{minutes:02}:{seconds:02}"
@@ -106,6 +135,7 @@ class WellbeingApp(App):
                 self.timer_event = None
 
     def set_session_length(self, seconds):
+        """Set session length with validation (20-1800 seconds)."""
         if seconds < 20:
             print("Session length too short! Must be at least 20 seconds.")
             return
@@ -124,7 +154,10 @@ class WellbeingApp(App):
 
     # ---------------- Monthly Summary ----------------
     def generate_all_summaries(self, user_id):
-        """Generate summaries for all months that have diary entries."""
+        """
+        Generate summaries for all months that have diary entries.
+        Queries DB for distinct months, computes stats, and saves summaries.
+        """
         import sqlite3
         conn = sqlite3.connect("wellbeing.db")
         cursor = conn.cursor()
@@ -146,6 +179,13 @@ class WellbeingApp(App):
 
     # ---------------- Quit / Popup Management ----------------
     def on_request_close(self, *args):
+        """
+        Handle quit requests:
+        - Warn user if unsaved diary entry exists
+        - Confirm quit if entry saved or already in DB
+        - Show extend popup if timer expired
+        - Allow quit otherwise
+        """
         diary_screen = self.root.get_screen("diary")
 
         diary_text = ""
@@ -154,35 +194,40 @@ class WellbeingApp(App):
 
         entry_saved = getattr(diary_screen, "entry_saved", False)
 
-        # --- NEW: check database for today's entry ---
+        # Check database for today's entry
         has_today_entry = False
         if self.current_user_id:
             today_str = datetime.now().strftime("%Y-%m-%d")
             year = datetime.now().year
             month = datetime.now().month
             rows = get_entries_for_month(self.current_user_id, year, month)
-            # rows = [(entry, timestamp, wellbeing_level, polarity), ...]
+            # rows = [(entry, timestamp, wellbeing_level, polarity), ...] and so on based on what's in the database
             has_today_entry = any(r[1].startswith(today_str) for r in rows)
 
+        """If the user wrote the diary but have not yet saved:"""
         if diary_text and not entry_saved:
             self.show_quit_popup("Save the entry first!", only_ok=True)
             return True
 
+        """If the user wrote and saved the diary but wants to quit:"""
         if entry_saved or has_today_entry:
             self.show_quit_popup("Leaving the app already?...", stay_quit=True)
             return True
 
+        """If the user not yet wrote diary but timer runs out:"""
         if not diary_text and self.remaining_time <= 0:
             self.show_extend_popup()
             return True
 
+        """If the user not yet wrote diary but wants to quit:"""
         if not diary_text and self.remaining_time > 0:
             self.show_quit_popup("You haven’t written anything yet. Quit anyway?", stay_quit=True)
             return True
 
-        return False  # allow quit
+        return False  # Allow quit
 
     def show_quit_popup(self, message, only_ok=False, stay_quit=False):
+        """Show quit confirmation popup with different button options."""
         content = BoxLayout(orientation="vertical", spacing=10, padding=10)
         content.add_widget(Label(text=message))
 
@@ -213,6 +258,7 @@ class WellbeingApp(App):
         popup.open()
 
     def show_extend_popup(self):
+        """Show popup when session expires, offering +5 minutes or quit."""
         content = BoxLayout(orientation="vertical", spacing=10, padding=10)
         content.add_widget(Label(text="Time’s up! Add +5 minutes?"))
 
@@ -228,19 +274,37 @@ class WellbeingApp(App):
                       auto_dismiss=False)
 
         def extend(instance):
+            """
+            Extend the session by 5 minutes:
+            - Resets session length to 300 seconds
+            - Dismisses popup
+            - Shows confirmation popup
+            """
             self.set_session_length(300)  # 5 minutes
             popup.dismiss()
             self._show_popup("Success", "Added extra 5 minutes!")
 
         def quit_app(instance):
+            """
+            Quit the application immediately:
+            - Dismisses pop up
+            - Stops the app and the Kivy itself
+            """
             popup.dismiss()
             super(WellbeingApp, self).stop()
 
+        # Bind buttons to actions
         add_btn.bind(on_release=extend)
         quit_btn.bind(on_release=quit_app)
         popup.open()
 
     def _show_popup(self, title, message):
+        """
+        Utility function to show a simple popup with a message.
+        Parameter:
+        - title: str, popup window title
+        - message: str, message displayed inside the popup
+        """
         content = BoxLayout(orientation="vertical", spacing=10, padding=10)
         content.add_widget(Label(text=message))
 
@@ -258,4 +322,6 @@ class WellbeingApp(App):
 
 
 if __name__ == "__main__":
+    
+    # The starting of the app
     WellbeingApp().run()

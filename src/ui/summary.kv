@@ -2,20 +2,21 @@
     BoxLayout:
         orientation: "vertical"
 
-        # Top bar
+        # ---------------- Top bar (navigation + timer + actions) ----------------
         BoxLayout:
             size_hint_y: None
             height: "104dp"
             padding: 10
             spacing: 10
 
-            # Left: stacked Back to Welcome + Back to Diary
+            # Left: stacked navigation buttons (Welcome + Diary)
             BoxLayout:
                 orientation: "vertical"
                 size_hint_x: None
                 width: "160dp"
                 spacing: 6
 
+                # Navigate back to Welcome screen
                 Button:
                     text: "< Back to Welcome"
                     size_hint_y: None
@@ -23,6 +24,7 @@
                     font_size: "14sp"
                     on_release: root.back_to_welcome()
 
+                # Navigate back to Diary screen
                 Button:
                     text: "< Back to Diary"
                     size_hint_y: None
@@ -30,11 +32,12 @@
                     font_size: "14sp"
                     on_release: root.back_to_diary()
 
+            # Spacer to balance layout
             Widget:
                 size_hint_x: None
                 width: "40dp"
 
-            # Center: countdown timer
+            # Center: countdown timer (bound to app.remaining_time_str)
             Label:
                 text: app.remaining_time_str
                 font_size: "14sp"
@@ -43,37 +46,40 @@
                 valign: "middle"
                 text_size: self.size
 
-            # Right: Settings + Refresh
+            # Right: Settings + Refresh buttons
             BoxLayout:
                 spacing: 10
                 size_hint_x: None
                 width: "210dp"
 
+                # Navigate to Settings screen
                 Button:
                     text: "Settings"
                     size_hint_x: None
                     width: "100dp"
                     on_release: root.go_to_settings()
 
+                # Refresh summary page (re-renders chart + AI insights)
                 Button:
                     text: "Refresh"
                     size_hint_x: None
                     width: "100dp"
                     on_release: root.refresh_page()
 
-        # Main content
+        # ---------------- Main content (Summary area) ----------------
         BoxLayout:
             orientation: "vertical"
             padding: 20
             spacing: 20
 
+            # Title label
             Label:
                 text: "Summary"
                 font_size: "22sp"
                 size_hint_y: None
                 height: "40dp"
 
-            # Scrollable container for chart + info
+            # Scrollable container for chart + textual insights + AI recommendation
             ScrollView:
                 BoxLayout:
                     orientation: "vertical"
@@ -82,18 +88,21 @@
                     size_hint_y: None
                     height: self.minimum_height
 
-                    BoxLayout:  # Chart container
+                    # Chart container (Matplotlib bar chart injected here)
+                    BoxLayout:
                         id: chart_box
                         size_hint_y: None
                         height: 450
 
-                    BoxLayout:  # Text + AI container
+                    # Text + AI container (stats + recommendation injected here)
+                    BoxLayout:
                         id: summary_container
                         orientation: "vertical"
                         spacing: 10
                         size_hint_y: None
                         height: self.minimum_height
 
+            # Button to navigate to Monthly Summary screen
             Button:
                 text: "Show Monthly Summary"
                 size_hint_y: None

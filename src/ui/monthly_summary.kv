@@ -4,14 +4,19 @@
         padding: 20
         spacing: 10
 
+        # ---------------- Title ----------------
         Label:
             text: "Available Monthly Summaries"
             font_size: "22sp"
             size_hint_y: None
             height: "40dp"
 
+        # ---------------- Scrollable list of months ----------------
         ScrollView:
             size_hint_y: 1
+
+            # Container for dynamically generated month buttons
+            # (Populated in monthly_summary.py via render_month_list)
             BoxLayout:
                 id: month_list
                 orientation: "vertical"

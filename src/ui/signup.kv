@@ -2,21 +2,21 @@
     BoxLayout:
         orientation: "vertical"
 
-        # Top bar (Back | CENTER timer | Refresh)
+        # ---------------- Top bar (Back | Center timer | Refresh) ----------------
         BoxLayout:
             size_hint_y: None
             height: "64dp"
             padding: 10
             spacing: 10
 
-            # Left: Back button
+            # Left: Back button (navigates to Welcome screen)
             Button:
                 text: "< Back to Welcome"
                 size_hint_x: None
                 width: "160dp"
                 on_release: root.back_to_welcome()
 
-            # Center: countdown timer (TRUE center)
+            # Center: countdown timer (bound to app.remaining_time_str)
             Label:
                 text: app.remaining_time_str
                 font_size: "14sp"
@@ -25,36 +25,42 @@
                 valign: "middle"
                 text_size: self.size
 
-            # Right: Refresh button (same width as Back)
+            # Right: Refresh button (same width as Back button)
             Button:
                 text: "Refresh"
                 size_hint_x: None
                 width: "160dp"
                 on_release: root.refresh_page()
 
-        # Main content
+        # ---------------- Main content (Signup form) ----------------
         BoxLayout:
             orientation: "vertical"
             padding: 20
             spacing: 20
 
+            # Title label
             Label:
                 text: "Sign Up"
                 font_size: "22sp"
 
+            # Username input field
             TextInput:
                 id: username
                 hint_text: "Choose a username"
                 size_hint_y: None
                 height: "40dp"
 
+            # Password input field
+            # Note: password is set to False here (characters visible),
+            # could be set to True for hidden input if preferred
             TextInput:
                 id: password
-                hint_text: "Choose a password (easy password is recommended! Because you'll hope on to this app everyday...)"
+                hint_text: "Choose a password (easy password is recommended! Because you'll hop on to this app everyday...)"
                 password: False
                 size_hint_y: None
                 height: "40dp"
 
+            # Confirm password input field
             TextInput:
                 id: confirm
                 hint_text: "Confirm password"
@@ -62,6 +68,7 @@
                 size_hint_y: None
                 height: "40dp"
 
+            # Create Account button (calls root.create_account())
             Button:
                 text: "Create Account"
                 size_hint_y: None

@@ -1,13 +1,29 @@
+"""
+Database module for the app.
+Handles initialization of SQLite database and schema migrations.
+Tables:
+- users: stores user credentials
+- diary: stores daily diary entries with sentiment analysis
+- settings: stores user-specific app settings (e.g., timer length)
+- monthly_summary: stores aggregated monthly wellbeing statistics
+"""
+
 import sqlite3
 from datetime import datetime
 
 DB_NAME = "wellbeing.db"
 
+
 def init_db():
+    """
+    Initialize the SQLite database:
+    - Create tables if they do not exist (users, diary, settings, monthly_summary)
+    - Run migration to enforce uniqueness in diary entries (one per user per day)
+    """
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
-    # Users table
+    # ---------------- Users table ----------------
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -16,7 +32,7 @@ def init_db():
     )
     """)
 
-    # Diary entries table
+    # ---------------- Diary entries table ----------------
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS diary (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -30,7 +46,7 @@ def init_db():
     )
     """)
 
-    # Settings table
+    # ---------------- Settings table ----------------
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS settings (
         user_id INTEGER PRIMARY KEY,
@@ -39,7 +55,7 @@ def init_db():
     )
     """)
 
-    # Monthly summary table
+    # ---------------- Monthly summary table ----------------
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS monthly_summary (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -60,7 +76,7 @@ def init_db():
     )
     """)
 
-    # Migrate diary table to enforce uniqueness
+    # Run migration to enforce uniqueness in diary entries
     _migrate_diary_date_and_uniqueness(cursor)
 
     conn.commit()
@@ -68,6 +84,13 @@ def init_db():
 
 
 def _migrate_diary_date_and_uniqueness(cursor):
+    """
+    Migration helper for diary table:
+    - Ensure 'date' column exists
+    - Backfill 'date' values from 'timestamp'
+    - Remove duplicate entries (keep earliest entry per user/date)
+    - Create unique index on (user_id, date)
+    """
     # Ensure 'date' column exists
     cursor.execute("PRAGMA table_info(diary)")
     cols = [row[1] for row in cursor.fetchall()]
@@ -87,7 +110,7 @@ def _migrate_diary_date_and_uniqueness(cursor):
         )
     """)
 
-    # Create unique index
+    # Create unique index on (user_id, date)
     cursor.execute("""
         CREATE UNIQUE INDEX IF NOT EXISTS idx_diary_user_date
         ON diary(user_id, date)
@@ -97,6 +120,14 @@ def _migrate_diary_date_and_uniqueness(cursor):
 # ---------------- User Management ----------------
 
 def add_user(username, password):
+    """
+    Add a new user to the database.
+    - Inserts username and password into 'users' table.
+    - Automatically creates a default settings row (timer_length = 1800 seconds).
+    Returns:
+        True if user successfully added,
+        False if username already exists (IntegrityError).
+    """
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     try:
@@ -110,7 +141,14 @@ def add_user(username, password):
     finally:
         conn.close()
 
+
 def check_user(username, password):
+    """
+    Check if a user exists with given username and password.
+    Returns:
+        user_id if credentials are valid,
+        None otherwise.
+    """
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute("SELECT id FROM users WHERE username=? AND password=?", (username, password))
@@ -118,7 +156,12 @@ def check_user(username, password):
     conn.close()
     return result[0] if result else None
 
+
 def ensure_settings(user_id):
+    """
+    Ensure that a settings row exists for the given user_id.
+    - If no settings exist, insert a default row (timer_length = 1800).
+    """
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute("SELECT 1 FROM settings WHERE user_id=?", (user_id,))
@@ -127,7 +170,14 @@ def ensure_settings(user_id):
         conn.commit()
     conn.close()
 
+
 def get_user_id(username):
+    """
+    Fetch user_id for a given username.
+    Returns:
+        user_id if found,
+        None otherwise.
+    """
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute("SELECT id FROM users WHERE username=?", (username,))
@@ -139,6 +189,14 @@ def get_user_id(username):
 # ---------------- Diary Management ----------------
 
 def add_entry(user_id, entry, timestamp):
+    """
+    Add a diary entry for a user.
+    - Extracts date from timestamp.
+    - Inserts entry into 'diary' table.
+    Returns:
+        True if entry successfully added,
+        False if duplicate entry exists for same user/date.
+    """
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     date_str = _extract_date(timestamp)
@@ -152,7 +210,16 @@ def add_entry(user_id, entry, timestamp):
     finally:
         conn.close()
 
+
 def add_entry_with_sentiment(user_id, entry, timestamp, wellbeing_level, polarity):
+    """
+    Add a diary entry with sentiment analysis results.
+    - Extracts date from timestamp.
+    - Inserts entry, wellbeing_level, and polarity into 'diary' table.
+    Returns:
+        True if entry successfully added,
+        False if duplicate entry exists for same user/date.
+    """
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     date_str = _extract_date(timestamp)
@@ -168,7 +235,13 @@ def add_entry_with_sentiment(user_id, entry, timestamp, wellbeing_level, polarit
     finally:
         conn.close()
 
+
 def get_entries(user_id):
+    """
+    Fetch all diary entries for a given user.
+    - Returns entry text, timestamp, wellbeing_level, and polarity.
+    - Ordered by timestamp (latest first).
+    """
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute("""
@@ -185,6 +258,13 @@ def get_entries(user_id):
 # ---------------- Settings Management ----------------
 
 def update_user_settings(user_id, timer_length=None):
+    """
+    Update user settings in the database.
+    Parameters:
+        user_id (int): ID of the user
+        timer_length (int, optional): New session timer length in seconds
+    - If timer_length is provided, update the settings row for the user.
+    """
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     if timer_length is not None:
@@ -192,7 +272,16 @@ def update_user_settings(user_id, timer_length=None):
     conn.commit()
     conn.close()
 
+
 def get_user_settings(user_id):
+    """
+    Fetch user settings from the database.
+    Parameters:
+        user_id (int): ID of the user
+    Returns:
+        dict with 'timer_length' if settings exist,
+        None otherwise.
+    """
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute("SELECT timer_length FROM settings WHERE user_id=?", (user_id,))
@@ -206,6 +295,15 @@ def get_user_settings(user_id):
 # ---------------- Monthly Summary Helpers ----------------
 
 def get_entries_for_month(user_id, year, month):
+    """
+    Fetch all diary entries for a given user and month.
+    Parameters:
+        user_id (int): ID of the user
+        year (int): Year of entries
+        month (int): Month of entries
+    Returns:
+        List of tuples (entry, timestamp, wellbeing_level, polarity).
+    """
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
     c.execute("""
@@ -219,10 +317,23 @@ def get_entries_for_month(user_id, year, month):
     conn.close()
     return rows
 
+
 def compute_month_stats(rows):
+    """
+    Compute statistics for a given month's diary entries.
+    Parameters:
+        rows (list): List of diary entries with sentiment data
+    Returns:
+        dict containing:
+            - counts: distribution of wellbeing levels
+            - avg_polarity: average sentiment polarity
+            - happiest_day: timestamp of happiest entry
+            - happiest_entry: text of happiest entry
+    """
     counts = {"very sad": 0, "sad": 0, "normal": 0, "happy": 0, "very happy": 0}
     polarities = []
     happiest = {"polarity": -2, "timestamp": None, "entry": None}
+
     for entry, ts, level, pol in rows:
         if level in counts:
             counts[level] += 1
@@ -230,6 +341,7 @@ def compute_month_stats(rows):
             polarities.append(pol)
             if pol > happiest["polarity"]:
                 happiest = {"polarity": pol, "timestamp": ts, "entry": entry}
+
     avg_pol = sum(polarities) / len(polarities) if polarities else 0.0
     return {
         "counts": counts,
@@ -238,7 +350,17 @@ def compute_month_stats(rows):
         "happiest_entry": happiest["entry"]
     }
 
+
 def upsert_monthly_summary(user_id, year, month, stats):
+    """
+    Insert or update monthly summary for a user.
+    Parameters:
+        user_id (int): ID of the user
+        year (int): Year of summary
+        month (int): Month of summary
+        stats (dict): Computed statistics for the month
+    - Uses SQLite UPSERT to update if summary already exists.
+    """
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
     c.execute("""
@@ -268,7 +390,14 @@ def upsert_monthly_summary(user_id, year, month, stats):
     conn.commit()
     conn.close()
 
+
 def get_monthly_summary(user_id, year, month):
+    """
+    Fetch monthly summary for a given user, year, and month.
+    Returns:
+        dict containing counts, avg_polarity, happiest_day, happiest_entry, generated_at
+        or None if no summary exists.
+    """
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
     c.execute("""
@@ -292,7 +421,14 @@ def get_monthly_summary(user_id, year, month):
         "generated_at": row[8]
     }
 
+
 def list_all_monthly_summaries(user_id):
+    """
+    List all monthly summaries for a given user.
+    Returns:
+        List of tuples (year, month, counts, avg_polarity, happiest_day, generated_at).
+        Ordered by year and month descending.
+    """
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
     c.execute("""
@@ -310,6 +446,13 @@ def list_all_monthly_summaries(user_id):
 # ---------------- Utils ----------------
 
 def _extract_date(timestamp_str):
+    """
+    Utility function to extract date from timestamp string.
+    Parameters:
+        timestamp_str (str): Timestamp in format 'YYYY-MM-DD HH:MM:SS' or ISO format
+    Returns:
+        str: First 10 characters (date segment, 'YYYY-MM-DD')
+    """
     # Expecting formats like 'YYYY-MM-DD HH:MM:SS' or ISO timestamps;
     # first 10 chars should be the date segment.
     return timestamp_str[:10]

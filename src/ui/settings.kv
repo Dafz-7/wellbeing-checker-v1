@@ -2,20 +2,21 @@
     BoxLayout:
         orientation: "vertical"
 
-        # Top bar (stacked left | CENTER timer | right refresh)
+        # ---------------- Top bar (stacked navigation | center timer | refresh) ----------------
         BoxLayout:
             size_hint_y: None
             height: "124dp"   # taller to fit 3 stacked buttons
             padding: 10
             spacing: 10
 
-            # Left: stacked Back buttons
+            # Left: stacked Back buttons (navigate to Welcome, Diary, Summary)
             BoxLayout:
                 orientation: "vertical"
                 size_hint_x: None
                 width: "160dp"
                 spacing: 6
 
+                # Navigate back to Welcome screen
                 Button:
                     text: "< Back to Welcome"
                     size_hint_y: None
@@ -23,6 +24,7 @@
                     font_size: "14sp"
                     on_release: root.back_to_welcome()
 
+                # Navigate back to Diary screen
                 Button:
                     text: "< Back to Diary"
                     size_hint_y: None
@@ -30,6 +32,7 @@
                     font_size: "14sp"
                     on_release: root.back_to_diary()
 
+                # Navigate back to Summary screen
                 Button:
                     text: "< Back to Summary"
                     size_hint_y: None
@@ -37,7 +40,7 @@
                     font_size: "14sp"
                     on_release: root.back_to_summary()
 
-            # Center: countdown timer
+            # Center: countdown timer (bound to app.remaining_time_str)
             Label:
                 text: app.remaining_time_str
                 font_size: "14sp"
@@ -46,35 +49,43 @@
                 valign: "middle"
                 text_size: self.size
 
-            # Right: Refresh button
+            # Right: Refresh button (clears input field and reloads settings)
             Button:
                 text: "Refresh"
                 size_hint_x: None
                 width: "160dp"
                 on_release: root.refresh_page()
 
-        # Main content
+        # ---------------- Main content (Settings form) ----------------
         BoxLayout:
             orientation: "vertical"
             padding: 20
             spacing: 20
 
+            # Title label
             Label:
                 text: "Settings"
                 font_size: "22sp"
 
+            # Session timer input row
             BoxLayout:
                 size_hint_y: None
                 height: "40dp"
                 spacing: 10
+
+                # Label for timer input
                 Label:
                     text: "Session Timer (seconds):"
+
+                # Text input for timer length (20–1800 seconds)
                 TextInput:
                     id: timer_input
                     hint_text: "Enter 20 - 1800"
                     multiline: False
                     size_hint_x: None
                     width: "120dp"
+
+                # Apply button (calls root.set_timer with entered value)
                 Button:
                     text: "Apply"
                     on_release: root.set_timer(timer_input.text)

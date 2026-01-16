@@ -1,3 +1,9 @@
+"""
+This file is for experiment purposes only.
+This is for seeding the entire database with past months.
+The results from this seeding is randomized and not real input.
+"""
+
 import sqlite3
 from datetime import datetime, timedelta
 from textblob import TextBlob

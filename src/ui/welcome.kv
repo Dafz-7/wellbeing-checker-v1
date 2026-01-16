@@ -2,40 +2,41 @@
     BoxLayout:
         orientation: "vertical"
 
-        # Top bar (TRUE centered timer)
+        # ---------------- Top bar (centered timer + refresh button) ----------------
         BoxLayout:
             size_hint_y: None
             height: "64dp"
             padding: 10
             spacing: 10
 
-            # Left spacer (matches refresh width)
+            # Left spacer (same width as refresh button to keep timer centered)
             Widget:
                 size_hint_x: None
                 width: "100dp"
 
-            # Center countdown (now truly centered)
+            # Center countdown label (shows remaining session time)
             Label:
-                text: app.remaining_time_str
+                text: app.remaining_time_str   # Bound to WellbeingApp.remaining_time_str
                 font_size: "16sp"
                 bold: True
                 halign: "center"
                 valign: "middle"
                 text_size: self.size
 
-            # Right refresh button
+            # Right refresh button (refreshes greeting + motivational message)
             Button:
                 text: "Refresh"
                 size_hint_x: None
                 width: "100dp"
                 on_release: root.refresh_page()
 
-        # Main content
+        # ---------------- Main content (greeting + motivational message) ----------------
         BoxLayout:
             orientation: "vertical"
             padding: 20
             spacing: 20
 
+            # Greeting label (shows "Welcome, user." or username if logged in)
             Label:
                 text: root.greeting
                 font_size: "24sp"
@@ -43,6 +44,7 @@
                 valign: "middle"
                 text_size: self.size
 
+            # Motivational message label (randomly chosen each refresh)
             Label:
                 text: root.message
                 font_size: "20sp"
@@ -50,15 +52,21 @@
                 valign: "middle"
                 text_size: self.size
 
+            # Spacer widget (pushes buttons down)
             Widget:
 
+            # ---------------- Navigation buttons ----------------
             BoxLayout:
                 size_hint_y: None
                 height: "40dp"
                 spacing: 10
+
+                # Navigate to Login screen
                 Button:
                     text: "Log in"
                     on_release: root.go_to_login()
+
+                # Navigate to Signup screen
                 Button:
                     text: "Sign up"
                     on_release: root.go_to_signup()

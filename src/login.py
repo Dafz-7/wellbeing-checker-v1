@@ -1,3 +1,8 @@
+"""
+Login Screen for the app.
+Handles user authentication, navigation to signup, and refresh/reset of login fields.
+"""
+
 from kivy.uix.screenmanager import Screen
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
@@ -5,11 +10,28 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.app import App
 
+# Database helpers
 from database import check_user, ensure_settings
 
 
 class LoginScreen(Screen):
+    """
+    Screen for user login.
+    Features:
+    - Username/password input
+    - Login validation against database
+    - Popup messages for success/error
+    - Navigation to signup or welcome screen
+    - Refresh/reset login fields
+    """
+
     def show_popup(self, title, message):
+        """
+        Utility function to show a popup with a message.
+        Parameters:
+        - title: str, popup window title
+        - message: str, message displayed inside the popup
+        """
         content = BoxLayout(orientation="vertical", spacing=10, padding=10)
         content.add_widget(Label(text=message))
 
@@ -22,10 +44,25 @@ class LoginScreen(Screen):
                       size=(300, 200),
                       auto_dismiss=False)
 
+        # Close popup when OK is pressed
         close_btn.bind(on_release=popup.dismiss)
         popup.open()
 
     def login(self):
+        """
+        Attempt to log in the user:
+        - Validate that username and password are provided
+        - Check credentials against database
+        - If valid:
+            * Ensure settings row exists in DB
+            * Save user info in App instance
+            * Generate monthly summaries silently
+            * Apply user-specific timer length
+            * Sync Settings screen input if available
+            * Show success popup and navigate to Diary screen
+        - If invalid:
+            * Show error popup
+        """
         username = self.ids.username.text.strip()
         password = self.ids.password.text.strip()
 
@@ -43,7 +80,7 @@ class LoginScreen(Screen):
             app.current_username = username
             app.current_user_display = f"Welcome, {username}"
 
-            # ✅ Generate summaries silently for all months
+            # Generate summaries silently for all months
             app.generate_all_summaries(user_id)
 
             # Load and apply timer_length from DB
@@ -62,10 +99,18 @@ class LoginScreen(Screen):
             self.show_popup("Error", "Invalid username or password.")
 
     def signup(self):
+        """
+        Navigate to the Signup screen.
+        """
         self.manager.transition.direction = "left"
         self.manager.current = "signup"
 
     def refresh_page(self):
+        """
+        Show confirmation popup before refreshing login fields.
+        - If confirmed: clear username and password inputs
+        - If canceled: do nothing
+        """
         content = BoxLayout(orientation="vertical", spacing=10, padding=10)
         content.add_widget(Label(text="You sure to refresh? All changes will be lost."))
 
@@ -83,6 +128,7 @@ class LoginScreen(Screen):
                       auto_dismiss=False)
 
         def do_refresh(instance):
+            """Clear login fields and show success popup."""
             self.ids.username.text = ""
             self.ids.password.text = ""
             print("Login page refreshed")
@@ -90,6 +136,7 @@ class LoginScreen(Screen):
             self.show_popup("Success", "Refresh success!")
 
         def cancel_refresh(instance):
+            """Cancel refresh and close popup."""
             popup.dismiss()
 
         yes_btn.bind(on_release=do_refresh)
@@ -97,5 +144,8 @@ class LoginScreen(Screen):
         popup.open()
 
     def back_to_welcome(self):
+        """
+        Navigate back to the Welcome screen.
+        """
         self.manager.transition.direction = "right"
         self.manager.current = "welcome"
