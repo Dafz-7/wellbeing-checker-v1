@@ -55,7 +55,7 @@ Here are the currently implemented features available in the app:
 Follow these steps to install and run **Wellbeing Checker**:
 
 1. **Download the app**
-   - Go to the GitHub Releases page in this repo (top right)
+   - Go to the GitHub Releases page [here](https://github.com/Dafz-7/Wellbeing-Checker-V1/releases/tag/latest)
    - Download the latest `.zip` file (e.g., `wellbeing-checker-v1.zip`)
 
 2. **Extract the folder**
