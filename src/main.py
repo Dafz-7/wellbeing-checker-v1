@@ -2,6 +2,28 @@
 Main application file for Wellbeing-Checker-V1.
 """
 
+import os
+import sys
+
+def resource_path(relative_path):
+    """
+    Make the absolute path to a resource file.
+
+    This helper ensures that resource files (.kv files, and others) can be
+    located both when running the app from source and when packaged with PyInstaller.
+
+    -- Parameters --
+    relative_path : str
+        The relative path to the resource file (e.g., "ui/welcome.kv").
+
+    -- Returns --
+    str
+        The absolute path to the resource file, adjusted for PyInstaller's
+        temporary directory (_MEIPASS) if applicable.
+    """
+    base_path = getattr(sys, '_MEIPASS', os.path.dirname(__file__))
+    return os.path.join(base_path, relative_path)
+
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, SlideTransition
@@ -88,13 +110,16 @@ class WellbeingApp(App):
         init_db()
 
         # Load KV files
-        Builder.load_file("ui/welcome.kv")
-        Builder.load_file("ui/login.kv")
-        Builder.load_file("ui/signup.kv")
-        Builder.load_file("ui/diary.kv")
-        Builder.load_file("ui/summary.kv")
-        Builder.load_file("ui/settings.kv")
-        Builder.load_file("ui/monthly_summary.kv")
+        """Using the resource_path() function at the top on these
+        KV file making sure they work after packaged with PyInstaller."""
+        Builder.load_file(resource_path("ui/welcome.kv"))
+        Builder.load_file(resource_path("ui/login.kv"))
+        Builder.load_file(resource_path("ui/signup.kv"))
+        Builder.load_file(resource_path("ui/diary.kv"))
+        Builder.load_file(resource_path("ui/summary.kv"))
+        Builder.load_file(resource_path("ui/settings.kv"))
+        Builder.load_file(resource_path("ui/monthly_summary.kv"))
+
 
         sm = Root()
         sm.add_widget(WelcomeScreen(name="welcome"))
