@@ -84,3 +84,6 @@ Follow these steps to install and run **Wellbeing Checker**:
 
 To uninstall, simply delete the `wellbeing-checker/` folder.  
 Your diary data is stored in `wellbeing.db` — delete or back up.
+
+## ZYBOOK progress (already completed)
+![zybook_screenshot](zybook_screenshot.jpg)
